@@ -1,95 +1,51 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import * as React from "react";
+import Box from "@mui/material/Box";
+import { LoadingSkeleton, SortComponent } from "@/components/atoms";
+import { getData } from "@/lib";
+import useSWR from "swr";
+import { sortByCreatedAt, sortByNameAZ, sortByNameZA, sortedItems } from "@/utils";
+import { Typography } from "@mui/material";
+import { DataComponent } from "@/components/molecules";
+
 
 export default function Home() {
+  const [sortBy, setSortBy] = React.useState(sortedItems[0].name);
+  const [sortedData, setSortedData] = React.useState([])
+  const { data, error, isLoading } = useSWR("/api/", getData);
+
+  const handleItemChange = (event) => {
+    const value =  event.target.value
+    if (value === "nameASC") {
+      setSortedData(sortByNameAZ(data));
+    } else if (value === "nameDESC") {
+      setSortedData(sortByNameZA(data));
+    } else {
+      setSortedData(sortByCreatedAt(data));
+    }
+    setSortBy(value);
+  };
+
+  if (error) {
+    return <Box sx={{ mx: 20, my: 2 }}><Typography sx={{textAlign: 'center', py: 10}} variant="h4">Failed to Load Data</Typography></Box>;
+  }
+  if (isLoading) {
+    return <Box sx={{ mx: 20, my: 2 }}><LoadingSkeleton /></Box>
+  }
+
+  const currentData = sortedData.length === 0 ? sortByCreatedAt(data) : sortedData
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+    <main>
+      <Box>
+        <Box sx={{ mx: 20, my: 5 }}>
+          <Typography sx={{my: 2, textAlign: 'center'}} variant="h4">Data Fetching & Data Sorting In Nextjs Using SWR</Typography>
+          {/* select tag */}
+          <SortComponent sortBy={sortBy} handleItemChange={handleItemChange} />
+          {/* show data */}
+          <DataComponent data={currentData} />
+        </Box>
+      </Box>
     </main>
-  )
+  );
 }
