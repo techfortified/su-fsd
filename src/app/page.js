@@ -38,7 +38,7 @@ export default function Home() {
   return (
     <main>
       <Box>
-        <Box sx={{ mx: 20, my: 5 }}>
+        <Box sx={{mx: {lg: 20, sm: 4, xs: 2}, my: {lg: 5}}}>
           <Typography sx={{my: 2, textAlign: 'center'}} variant="h4">Data Fetching & Data Sorting In Nextjs Using SWR</Typography>
           {/* select tag */}
           <SortComponent sortBy={sortBy} handleItemChange={handleItemChange} />
